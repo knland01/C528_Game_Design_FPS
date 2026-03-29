@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class GunHitscan : MonoBehaviour
 {
+    [Header("Player")]
+    public Transform owner;
+
     [Header("Refs")]
     public Transform muzzle;
 
@@ -18,7 +21,7 @@ public class GunHitscan : MonoBehaviour
 
     [Header("Hit Filtering")]
     // Controls what the ray is allowed to hit
-    public LayerMask hitMask = ~0;
+    //public LayerMask hitMask = ~0;
 
     // Tracks when you're allowed to shoot again
     [SerializeField] private float nextFireTime;
@@ -27,7 +30,7 @@ public class GunHitscan : MonoBehaviour
     void Start()
     {
         // Make sure the player doesn't hit self
-        hitMask = ~LayerMask.GetMask("Player");
+        //hitMask = ~LayerMask.GetMask("Player");
     }
 
     void Update()
@@ -56,35 +59,43 @@ public class GunHitscan : MonoBehaviour
             muzzleFlash.Play();
 
         Ray ray = new Ray(muzzle.position, muzzle.forward);
+        RaycastHit[] hits = Physics.RaycastAll(ray, range);
 
-        // Did the ray hit something?
-        if (Physics.Raycast(
-                ray,
-                out RaycastHit hit,
-                range,
-                hitMask,
-                QueryTriggerInteraction.Ignore))
+        // Sort hits by distance (important!)
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        bool hitSomething = false;
+
+        foreach (RaycastHit hit in hits)
         {
-            Debug.Log($"HIT: {hit.collider.name}"); // What it hit?
+            Debug.Log(
+                $"HIT: {hit.collider.name} | " +
+                $"ROOT: {hit.collider.transform.root.name} | " +
+                $"MY ROOT: {transform.root.name}"
+            );
 
-            // Ignore the player if shot fired inside own collider
-            if (hit.collider.transform.root == transform.root) // hit.collider = the thing you hit
-                return;
+            // Skip self (your own player or attachments)
+            if (hit.collider.transform.IsChildOf(owner))
+                continue;
 
+            
+
+            // Try to damage
             Health hp = hit.collider.GetComponentInParent<Health>();
             if (hp != null)
+            {
+                hitSomething = true;
                 hp.TakeDamage(damage);
+                break; // stop after first valid hit
+            }
+        }
 
-            Debug.DrawLine(muzzle.position, muzzle.position + muzzle.forward * range, Color.red, 1f);
-        }
-        else
-        {
-            Debug.DrawLine(
-                muzzle.position,
-                muzzle.position + muzzle.forward * range,
-                Color.red,
-                0.1f
-            );
-        }
+        // Draw debug ray
+        Debug.DrawLine(
+            muzzle.position,
+            muzzle.position + muzzle.forward * range,
+            Color.red,
+            hitSomething ? 1f : 0.1f
+        );
     }
 }
