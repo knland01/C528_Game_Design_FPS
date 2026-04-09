@@ -87,11 +87,6 @@ public class PlayerMovement : MonoBehaviour
         // MATH BREAKDOWN: 60 FPS -> 0.0167 SPF --> 3M/sec --> 3 * SPF = distance per frame
         if (Input.GetKey(rturnKey))
             transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime);
-        // ROTATION - (x, y, z) = (pitch, yaw, roll)
-        // - xPITCH = Look up / down
-        // - yYAW = turn L/R
-        // - zROLL = tilt L/R
-        // Vector3.up = (0f, 1f, 0f) <-- it's a complete vector defined like this
 
 
         move = move.normalized; // removes scaling with stacked movement keys - keeping speed consistent
@@ -104,21 +99,13 @@ public class PlayerMovement : MonoBehaviour
 
         controller.Move(move * moveSpeed * Time.deltaTime); // Where character is physically moved
 
-        // Grounded reset
-        //if (controller.isGrounded && velocity.y < 0f)
-        //    velocity.y = -2f;
-        //print(controller.isGrounded);
 
         // Jump
-        //if (controller.isGrounded && Input.GetKeyDown(jumpKey))
         if (Input.GetKeyDown(jumpKey) && transform.position.y < maxJumpHeight)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2 * gravity);
         }
 
-        // gravity
-        //if (controller.isGrounded && velocity.y < 0)
-        //    velocity.y = -2f;
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime); // Also where character is moved (vertically)

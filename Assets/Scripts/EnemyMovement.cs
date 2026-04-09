@@ -12,9 +12,7 @@ public class EnemyMovement : MonoBehaviour
     private Vector3 targetPosition;
     private Animator animator; // reference to animator component attached to enemy object
     private Vector3 moveDirection;
-    private float avoidUntilTime = 0f;
-
-
+    //private float avoidUntilTime = 0f;
 
     void Start()
     {
@@ -60,25 +58,6 @@ public class EnemyMovement : MonoBehaviour
             Vector3 direction = player.position - transform.position;
             direction.y = 0;
 
-            //// OBSTACLE CHECK WHILE CHASING
-            //Ray chaseRay = new Ray(transform.position, direction.normalized);
-            //RaycastHit chaseHit;
-
-            //if (Physics.SphereCast(chaseRay, 0.1f, out chaseHit, obstacleRange))
-            //{
-            //    animator.SetBool("isWalking", false);
-
-            //    float angle = Random.Range(90f, 160f);
-            //    float sign = Random.value < 0.5f ? -1f : 1f;
-
-            //    transform.Rotate(0, angle * sign, 0);
-
-            //    // Smooth transition away from obstacle and back towards player
-            //    moveDirection = transform.forward;
-            //    avoidUntilTime = Time.time + 0.5f;
-            //    return;
-            //}
-
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
@@ -101,7 +80,7 @@ public class EnemyMovement : MonoBehaviour
             return; // IMPORTANT: prevents wandering logic from running
         }
 
-        // === 1. OBSTACLE DETECTION ===
+        // === OBSTACLE DETECTION ===
         Ray ray = new Ray(transform.position, moveDirection);
         RaycastHit hit;
 
@@ -120,7 +99,7 @@ public class EnemyMovement : MonoBehaviour
             return;
         }
 
-        // === 2. MOVE FORWARD ===
+        // === MOVE FORWARD ===
         animator.SetBool("isWalking", true);
 
         transform.rotation = Quaternion.Slerp(

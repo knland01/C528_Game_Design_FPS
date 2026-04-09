@@ -1,10 +1,16 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Health : MonoBehaviour
 {
     public float maxHealth = 100f;
     public bool canDie = true;
+    public Image healthBarFill;
+    public float healRate = 5f;
+    public float healDelay = 5f;
+    public bool canRegenHealth = false; // Players and Sheriff
 
+    private float lastDamageTime;
     private float currentHealth;
     private bool isDead;
     private GameObject lastAttacker;
@@ -14,6 +20,23 @@ public class Health : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    void Update()
+    {
+        if (isDead) return;
+        // Only heal if enough time has passed since last damage
+        if (!canRegenHealth) return;
+        if (Time.time - lastDamageTime >= healDelay)
+        {
+            if (currentHealth < maxHealth)
+            {
+                currentHealth += healRate * Time.deltaTime;
+                currentHealth = Mathf.Min(currentHealth, maxHealth);
+
+                UpdateHealthBar();
+            }
+        }
+    }
+
     public void TakeDamage(float amount, GameObject attacker)
     {
         if (isDead) // I am dead.
@@ -21,6 +44,7 @@ public class Health : MonoBehaviour
 
         currentHealth -= amount;
         currentHealth = Mathf.Max(currentHealth, 0f); // no neg HP vals
+        UpdateHealthBar();
 
         lastAttacker = attacker; // used for killshot + Kill Points
 
@@ -51,9 +75,8 @@ public class Health : MonoBehaviour
                 int penalty = ScoreRules.GetHitByPenalty(attackerRole.role);
                 myScore.AddScore(penalty);
 
-                Debug.Log($"[PENALTY] {name} lost {penalty}");
+                //Debug.Log($"[PENALTY] {name} lost {penalty}");
             }
-
         }
         // ----------------------------------
 
@@ -86,5 +109,27 @@ public class Health : MonoBehaviour
         gameObject.SetActive(false);
 
     }
-    
+    void UpdateHealthBar()
+    {
+        if (healthBarFill == null)
+            return;
+
+        float percent = currentHealth / maxHealth;
+
+        healthBarFill.fillAmount = percent;
+
+        if (percent < 0.3f)
+        {
+            healthBarFill.color = Color.red;
+        }
+        else if (percent < 0.6f)
+        {
+            healthBarFill.color = Color.yellow;
+        }
+        else
+        {
+            healthBarFill.color = Color.green;
+        }
+    }
+
 }

@@ -64,7 +64,7 @@ public class PlayerShoot : MonoBehaviour
         // Sort hits by distance (important!)
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
-        bool hitSomething = false;
+        //bool hitSomething = false;
 
         foreach (RaycastHit hit in hits)
         {
@@ -82,18 +82,18 @@ public class PlayerShoot : MonoBehaviour
             Health hp = hit.collider.GetComponentInParent<Health>();
             if (hp != null)
             {
-                hitSomething = true;
+                //hitSomething = true;
                 hp.TakeDamage(damage, gameObject);
                 break; // stop after first valid hit
             }
         }
 
         // Draw debug ray
-        Debug.DrawLine(
-            muzzle.position,
-            muzzle.position + muzzle.forward * range,
-            Color.red,
-            hitSomething ? 1f : 0.1f
-        );
+        //Debug.DrawLine(
+        //    muzzle.position,
+        //    muzzle.position + muzzle.forward * range,
+        //    Color.red,
+        //    hitSomething ? 1f : 0.1f
+        //);
     }
 }
